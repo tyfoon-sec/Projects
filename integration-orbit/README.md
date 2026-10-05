@@ -180,6 +180,72 @@ requires authenticated ingestion, immutable centrally retained events,
 clock-sync and source validation, protected analyst access, tenant boundaries,
 case workflows, alerting, enrichment, and documented response procedures.
 
+## Threat intelligence workflow (scope planner only)
+
+The **Threat map** view is a planning interface for an eventual closed-loop
+intelligence workflow: define authorized scope → run selected passive
+transformations → correlate evidence with provenance → analyst review → create
+and track remediation tasks. It accepts domain names, email addresses, and
+canonical public GitHub user, organization, or repository identifiers. The
+draft and selected transformation profile are saved in this browser only.
+Saving a scope or exporting its Markdown report makes no network requests and
+produces no findings; the current map displays only the assets you entered.
+Authorization and email-consent checkboxes are local self-attestations, not
+proof of ownership or consent.
+
+The candidate adapter allowlist is deliberately small: RDAP registration
+metadata, basic DNS records (A/AAAA, MX, NS, TXT), Certificate Transparency
+records, public GitHub API metadata, and public `robots.txt`/`security.txt`
+metadata. There is no active scanning, port probing, exploit validation,
+credential testing, breach-dump search, private-account enrichment, or
+unbounded crawling. The queue control remains disabled until a secured backend
+exists. The OpenAPI definitions for `threat-intel` are a future contract, not
+deployed routes or live integrations.
+
+Before implementing those routes, the backend must verify authorization for
+each target (the UI checkbox is never sufficient), require a verifiable
+authorization record, and apply a fixed provider allowlist, outbound egress
+policy, DNS/IP rebinding defenses, strict request and response size limits,
+tenant isolation, deduplication, rate/concurrency/total-request budgets,
+timeouts, cancellation, safe redirect policy, and audit retention. Keep
+provider credentials server-side. Never turn user-supplied targets into
+unrestricted server-side requests. For email addresses, require documented
+organizational purpose and appropriate consent; avoid personal profiling and
+do not query breach or credential datasets.
+
+Every returned fact and graph edge must retain provider, source URL, collection
+time, exact transformation, and confidence. Mark observations as source facts
+or analyst/model inferences; include model/version and explicit uncertainty
+for inferred relationships. Do not present a candidate correlation as a
+confirmed relationship. Scope-only reports must clearly say that no source was
+contacted and no intelligence was collected. Analyst approval should be
+required before a finding becomes a workflow task, and remediation closure
+should link back to the reviewed evidence and audit history.
+
+When a backend is deployed, a run request follows this shape (the referenced
+authorization record must already exist and be verified server-side):
+
+```sh
+curl --fail-with-body --request POST \
+  "$ORBIT_API/v1/workspaces/workspace-123/threat-intel/runs" \
+  --header "Authorization: ******" \
+  --header "Content-Type: application/json" \
+  --header "Idempotency-Key: 827d91d4-9360-4e37-9614-1a340e9b0552" \
+  --data '{
+    "assets": [{"type": "domain", "value": "example.com"}],
+    "transformations": ["rdap", "dns-basic"],
+    "authorizationReference": "authz-record-123"
+  }'
+```
+
+The proposed API caps a run at 20 assets, 50 provider requests, 120 seconds,
+one concurrent run per workspace, two submissions per principal per minute,
+and ten runs per workspace per hour. These are contract defaults to enforce
+and tune against the deployed providers, not capabilities currently present
+in this static app. Results use typed findings and relationships with required
+provenance; callers need `threat:run`, `threat:read`, and `threat:cancel` scopes
+for submission, inspection, and cancellation respectively.
+
 The proposed agent API contract is
 [`api/openapi.yaml`](./api/openapi.yaml) (OpenAPI 3.1). Its human-paced defaults
 are 6 calls/minute per agent, 20 calls/minute per workspace, at most 2

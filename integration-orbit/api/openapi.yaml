@@ -147,6 +147,111 @@ paths:
                 $ref: "#/components/schemas/AgentPolicy"
         "403":
           description: Caller lacks policy:read for this workspace.
+  /workspaces/{workspaceId}/threat-intel/runs:
+    post:
+      operationId: submitThreatIntelRun
+      summary: Queue an authorized, bounded passive intelligence run.
+      description: >
+        This future endpoint must verify caller authorization and target scope
+        server-side before contacting any provider. Accept only the enumerated
+        passive transformations. The browser's consent checkboxes are not
+        evidence of authorization. Enforce per-tenant budgets, provider
+        allowlists, egress policy, deduplication, request deadlines, and audit
+        logging. Do not perform port scanning, exploit checks, credential
+        attempts, breach-dump searches, or private-account enrichment.
+      security:
+        - oauth2: [threat:run]
+      x-rate-limit:
+        per-principal-per-minute: 2
+        per-workspace-per-hour: 10
+        max-concurrent-runs: 1
+        maximum-assets-per-run: 20
+        maximum-provider-requests-per-run: 50
+        maximum-runtime-seconds: 120
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            minLength: 16
+            maxLength: 128
+          description: Prevent duplicate collection runs on client retries.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ThreatIntelRunRequest"
+      responses:
+        "202":
+          description: Bounded run accepted after authorization checks.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThreatIntelRun"
+        "401":
+          description: Missing or invalid authentication.
+        "403":
+          description: Caller or requested target is not authorized.
+        "409":
+          description: Idempotency key reused for a different request.
+        "422":
+          description: Scope or transformation request is invalid.
+        "429":
+          description: Rate, provider, or workspace budget limit reached.
+  /workspaces/{workspaceId}/threat-intel/runs/{runId}:
+    get:
+      operationId: getThreatIntelRun
+      summary: Read a caller-authorized threat intelligence run and evidence.
+      security:
+        - oauth2: [threat:read]
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "200":
+          description: Run state with provenance-bearing results when complete.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThreatIntelRun"
+        "403":
+          description: Caller lacks access to this run.
+        "404":
+          description: Run not found.
+  /workspaces/{workspaceId}/threat-intel/runs/{runId}/cancel:
+    post:
+      operationId: cancelThreatIntelRun
+      summary: Cancel queued or active passive collection immediately.
+      security:
+        - oauth2: [threat:cancel]
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "202":
+          description: Cancellation accepted and audited.
+        "403":
+          description: Caller lacks cancellation permission.
+        "404":
+          description: Run not found.
 components:
   securitySchemes:
     oauth2:
@@ -159,6 +264,9 @@ components:
             workflow:cancel: Cancel a caller-authorized agent workflow.
             analytics:read: Read scoped shared analytics aggregates.
             policy:read: Read effective workflow policy.
+            threat:run: Queue authorized, bounded passive intelligence runs.
+            threat:read: Read authorized threat intelligence results.
+            threat:cancel: Cancel authorized threat intelligence runs.
   parameters:
     RunId:
       name: runId
@@ -273,3 +381,162 @@ components:
           minimum: 1
         requireHumanApprovalForExternalWrites:
           type: boolean
+    ThreatIntelRunRequest:
+      type: object
+      additionalProperties: false
+      required: [assets, transformations, authorizationReference]
+      properties:
+        assets:
+          type: array
+          minItems: 1
+          maxItems: 20
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/ThreatIntelAsset"
+        transformations:
+          type: array
+          minItems: 1
+          maxItems: 5
+          uniqueItems: true
+          items:
+            type: string
+            enum: [rdap, dns-basic, certificate-transparency, github-public, web-metadata]
+        authorizationReference:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Server-verifiable authorization record identifier; never a checkbox value.
+    ThreatIntelAsset:
+      type: object
+      additionalProperties: false
+      required: [type, value]
+      properties:
+        type:
+          type: string
+          enum: [domain, email, github]
+        value:
+          type: string
+          minLength: 3
+          maxLength: 253
+          description: >
+            Normalized domain, consented organizational email, or canonical
+            public github.com user, organization, or repository identifier.
+    ThreatIntelRun:
+      type: object
+      additionalProperties: false
+      required: [runId, workspaceId, status, createdAt, transformations]
+      properties:
+        runId:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+        status:
+          type: string
+          enum: [queued, running, completed, failed, cancelled]
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        transformations:
+          type: array
+          items:
+            type: string
+            enum: [rdap, dns-basic, certificate-transparency, github-public, web-metadata]
+        requestsUsed:
+          type: integer
+          minimum: 0
+          maximum: 50
+        errorCode:
+          type: string
+          maxLength: 80
+        findings:
+          type: array
+          maxItems: 500
+          items:
+            $ref: "#/components/schemas/ThreatIntelFinding"
+        relationships:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/ThreatIntelRelationship"
+    ThreatIntelFinding:
+      type: object
+      additionalProperties: false
+      required: [findingId, asset, title, observedAt, confidence, provenance]
+      properties:
+        findingId:
+          type: string
+          minLength: 1
+          maxLength: 120
+        asset:
+          $ref: "#/components/schemas/ThreatIntelAsset"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 300
+        observedAt:
+          type: string
+          format: date-time
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        provenance:
+          $ref: "#/components/schemas/ThreatIntelProvenance"
+    ThreatIntelRelationship:
+      type: object
+      additionalProperties: false
+      required: [relationshipId, sourceAsset, target, relationship, evidenceKind, confidence, uncertainty, provenance]
+      properties:
+        relationshipId:
+          type: string
+          minLength: 1
+          maxLength: 120
+        sourceAsset:
+          $ref: "#/components/schemas/ThreatIntelAsset"
+        target:
+          type: string
+          minLength: 1
+          maxLength: 253
+        relationship:
+          type: string
+          minLength: 1
+          maxLength: 120
+        evidenceKind:
+          type: string
+          enum: [source_fact, analyst_inference, model_inference]
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        uncertainty:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        provenance:
+          $ref: "#/components/schemas/ThreatIntelProvenance"
+    ThreatIntelProvenance:
+      type: object
+      additionalProperties: false
+      required: [provider, sourceUrl, collectedAt, transformation]
+      properties:
+        provider:
+          type: string
+          minLength: 1
+          maxLength: 120
+        sourceUrl:
+          type: string
+          format: uri
+        collectedAt:
+          type: string
+          format: date-time
+        transformation:
+          type: string
+          minLength: 1
+          maxLength: 160
+        modelVersion:
+          type: string
+          maxLength: 120

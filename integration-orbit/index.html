@@ -29,6 +29,7 @@
           <a class="nav-item" href="#"><span class="nav-icon">◷</span> My tasks <span class="nav-count">3</span></a>
           <a class="nav-item" href="#"><span class="nav-icon">⌕</span> Search</a>
           <button class="nav-item" id="analytics-nav" type="button" title="Business insights" aria-label="Business insights"><span class="nav-icon">▥</span> Business insights</button>
+          <button class="nav-item" id="threat-nav" type="button" title="Passive OSINT threat map" aria-label="Passive OSINT threat map"><span class="nav-icon">⌘</span> Threat map</button>
           <button class="nav-item" id="elastic-nav" type="button" title="Elastic logs and incident response" aria-label="Elastic logs and incident response"><span class="nav-icon">⌁</span> Elastic logs</button>
           <button class="nav-item" id="admin-nav" type="button" title="Administration and audit" aria-label="Administration and audit"><span class="nav-icon">⚙</span> Admin &amp; audit</button>
         </nav>
@@ -172,6 +173,7 @@
           <button type="button" class="console-tab" data-console-tab="audit">Audit log <span id="audit-count">0</span></button>
           <button type="button" class="console-tab" data-console-tab="admin">Administration</button>
           <button type="button" class="console-tab" data-console-tab="access">Access control</button>
+          <button type="button" class="console-tab" data-console-tab="threat">Threat map</button>
           <button type="button" class="console-tab elastic-tab" data-console-tab="elastic">Elastic logs <span id="elastic-count">0</span></button>
         </nav>
         <section class="console-view insights-view" id="insights-view">
@@ -276,6 +278,49 @@
               <div class="security-callout">Do not treat these browser-managed groups or checkboxes as access controls until a backend enforces them.</div>
             </section>
           </div>
+        </section>
+        <section class="console-view threat-view" id="threat-view" hidden>
+          <div class="threat-heading">
+            <div><div class="elastic-breadcrumb">INTELLIGENCE WORKFLOW <span>/</span> PASSIVE OSINT</div><h3>Scope → transform → correlate → report</h3><p>Run small, auditable transformations and turn evidence into a reviewable intelligence report.</p></div>
+            <div class="threat-heading-actions"><span class="threat-demo-badge"><i></i> Scope planner · no sources connected</span><button type="button" id="export-threat-report" class="console-export">Export report</button></div>
+          </div>
+          <div class="threat-safety"><strong>Authorized, passive collection only.</strong> Add assets only when you own them or have written authorization. This prototype saves a scope draft locally and makes no DNS, HTTP, GitHub, or OSINT requests.</div>
+          <div class="threat-layout">
+            <section class="threat-card threat-scope-card">
+              <div class="threat-card-heading"><span class="threat-step">01</span><div><strong>Define authorized scope</strong><small>Add one domain, email, or public GitHub identity per line.</small></div></div>
+              <form id="threat-scope-form" class="threat-scope-form">
+                <label for="threat-assets-input">ASSETS TO INCLUDE</label>
+                <textarea id="threat-assets-input" rows="4" maxlength="2000" placeholder="example.com&#10;security@example.com&#10;github.com/acme&#10;github.com/acme/project"></textarea>
+                <div class="threat-supported-types"><span>✓ Domain</span><span>✓ Email address</span><span>✓ Public GitHub user/org/repo</span></div>
+                <label class="scope-authorization"><input type="checkbox" id="scope-authorization"><span>I own these assets or have written authorization to assess them.</span></label>
+                <label class="scope-privacy"><input type="checkbox" id="scope-email-consent"><span>Email addresses are organizational assets submitted with appropriate consent; do not use this for personal profiling.</span></label>
+                <button type="submit" class="button button-primary" id="save-threat-scope">Save scope draft</button>
+              </form>
+              <div class="threat-assets-list-heading"><strong>Saved scope</strong><span id="threat-asset-count">0 assets</span></div>
+              <div id="threat-assets-list" class="threat-assets-list"></div>
+              <div class="threat-authorization-note">Before a live assessment, the backend must verify domain/GitHub control and record consent for email-related checks. A checked box alone is not verification.</div>
+            </section>
+            <section class="threat-card threat-map-card">
+              <div class="threat-card-heading"><span class="threat-step">02</span><div><strong>Threat relationship map</strong><small>Every edge needs a source, timestamp, and confidence.</small></div><button type="button" id="refresh-threat-map" class="console-refresh">↻ Refresh</button></div>
+              <div id="threat-map-canvas" class="threat-map-canvas"></div>
+              <div class="threat-map-legend"><span><i class="asset-node-legend"></i> In-scope asset</span><span><i class="evidence-edge-legend"></i> Verified public evidence</span><span><i class="unknown-node-legend"></i> Unverified candidate</span></div>
+              <div class="threat-map-empty" id="threat-map-empty"><span>⌘</span><strong>No intelligence collected</strong><p>Save an authorized scope above. A connected backend can then queue allowlisted passive sources and return evidence-linked relationships.</p></div>
+              <div class="threat-sources"><strong>Choose bounded transformations</strong><p>Select only the public sources needed for this investigation.</p>
+                <label><input type="checkbox" value="rdap" data-threat-source> RDAP · domain registration metadata</label>
+                <label><input type="checkbox" value="dns-basic" data-threat-source> DNS · A/AAAA, MX, NS, TXT records</label>
+                <label><input type="checkbox" value="certificate-transparency" data-threat-source> Certificate Transparency · public certificate records</label>
+                <label><input type="checkbox" value="github-public" data-threat-source> GitHub API · public profile/repository metadata</label>
+                <label><input type="checkbox" value="web-metadata" data-threat-source> Public web metadata · robots.txt and security.txt</label>
+                <small>Adapter allowlists, request limits, and provider credentials must be controlled by the backend. No source requests are made by this page.</small>
+              </div>
+            </section>
+          </div>
+          <div class="threat-workflow">
+            <article><span class="threat-step">03</span><div><strong>Queue a bounded run</strong><p>Human-paced queue, strict source allowlists, tenant budgets, deadlines, cancellation, and request deduplication.</p><button type="button" id="queue-threat-run" class="threat-queue-button" disabled>Queue run · backend offline</button></div></article>
+            <article><span class="threat-step">04</span><div><strong>Correlate &amp; review</strong><p>Separate source facts from analyst/ML inference. Preserve provenance, model/version, timestamp, confidence, and uncertainty on every edge.</p><span class="threat-state">No inferred relationships shown</span></div></article>
+            <article><span class="threat-step">05</span><div><strong>Close the loop</strong><p>Analyst-approved intelligence becomes a workflow task; verified remediation updates the finding and informs later prioritization.</p><span class="threat-state">Approval-gated · no findings yet</span></div></article>
+          </div>
+          <div class="threat-boundary-note">This is not an active scanner and does not reproduce Rapid7, Nessus, Huntress, or Greenbone capabilities. No port scans, exploit checks, login attempts, breach-dump searches, or private-account enrichment. Those products’ exports can be integrated later as clearly attributed evidence; Orbit’s own reports should be generated from authorized, source-attributed transformations.</div>
         </section>
       </div>
     </dialog>

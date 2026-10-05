@@ -9,6 +9,7 @@ const GROUPS_KEY = "orbit-groups-v1";
 const ACL_KEY = "orbit-acl-v1";
 const API_POLICY_KEY = "orbit-api-policy-v1";
 const IR_STATE_KEY = "orbit-ir-state-v1";
+const THREAT_SCOPE_KEY = "orbit-threat-scope-v1";
 const PERMISSIONS = [
   { id: "read", label: "Read board" },
   { id: "edit", label: "Edit tasks" },
@@ -49,6 +50,7 @@ let directoryGroups = loadDirectoryGroups();
 let userAcl = loadUserAcl();
 let apiPolicy = loadApiPolicy();
 let irState = loadIrState();
+let threatScope = loadThreatScope();
 let generatedTicketTitles = [];
 let selectedElasticEventId = null;
 
@@ -245,6 +247,91 @@ function recordAudit(category, action, detail) {
   localStorage.setItem(AUDIT_KEY, JSON.stringify(auditEvents));
   const count = document.querySelector("#audit-count");
   if (count) count.textContent = auditEvents.length;
+}
+
+function loadThreatScope() {
+  try {
+    const saved = localStorage.getItem(THREAT_SCOPE_KEY);
+    if (!saved) return { assets: [], sources: [], authorizationConfirmed: false, emailConsentConfirmed: false };
+    const parsed = JSON.parse(saved);
+    if (!parsed || !Array.isArray(parsed.assets) || !Array.isArray(parsed.sources)) {
+      throw new Error("Saved threat scope is not valid.");
+    }
+    return {
+      assets: parsed.assets.filter((asset) => asset && ["domain", "email", "github"].includes(asset.type) && typeof asset.value === "string"),
+      sources: parsed.sources.filter((source) => ["rdap", "dns-basic", "certificate-transparency", "github-public", "web-metadata"].includes(source)),
+      authorizationConfirmed: parsed.authorizationConfirmed === true,
+      emailConsentConfirmed: parsed.emailConsentConfirmed === true,
+    };
+  } catch (error) {
+    console.error("Could not load the saved threat scope.", error);
+    return { assets: [], sources: [], authorizationConfirmed: false, emailConsentConfirmed: false };
+  }
+}
+
+function persistThreatScope() {
+  localStorage.setItem(THREAT_SCOPE_KEY, JSON.stringify(threatScope));
+}
+
+function parseThreatAsset(raw) {
+  const value = raw.trim();
+  if (!value) return null;
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+    return { type: "email", value: value.toLowerCase() };
+  }
+  if (/^https?:\/\//i.test(value) || value.includes("/")) {
+    let url;
+    try {
+      url = new URL(value.startsWith("github.com/") ? `https://${value}` : value);
+    } catch {
+      throw new Error(`Invalid asset: ${value}`);
+    }
+    const parts = url.pathname.split("/").filter(Boolean);
+    if (url.hostname.toLowerCase() !== "github.com" || url.protocol !== "https:" || url.search || url.hash ||
+      parts.length < 1 || parts.length > 2 || parts.some((part) => !/^[A-Za-z0-9_.-]+$/.test(part))) {
+      throw new Error(`Use a public GitHub user, organization, or repository URL: ${value}`);
+    }
+    return { type: "github", value: `github.com/${parts.join("/")}` };
+  }
+  const domain = value.toLowerCase().replace(/\.$/, "");
+  const labels = domain.split(".");
+  if (domain.length > 253 || labels.length < 2 ||
+    labels.some((label) => label.length > 63 || !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(label))) {
+    throw new Error(`Enter a domain, email address, or public GitHub identity: ${value}`);
+  }
+  return { type: "domain", value: domain };
+}
+
+function renderThreatScope() {
+  const count = document.querySelector("#threat-asset-count");
+  if (!count) return;
+  count.textContent = `${threatScope.assets.length} asset${threatScope.assets.length === 1 ? "" : "s"}`;
+  document.querySelector("#threat-assets-list").innerHTML = threatScope.assets.map((asset, index) =>
+    `<div class="threat-asset"><span class="threat-asset-type">${escapeHtml(asset.type)}</span><strong>${escapeHtml(asset.value)}</strong><button type="button" data-remove-threat-asset="${index}" aria-label="Remove ${escapeHtml(asset.value)}">×</button></div>`
+  ).join("") || '<p class="threat-assets-empty">No assets in the local draft.</p>';
+  document.querySelector("#threat-map-canvas").innerHTML = threatScope.assets.map((asset) =>
+    `<div class="threat-map-node"><span>${escapeHtml(asset.type)}</span><strong>${escapeHtml(asset.value)}</strong><small>In-scope · not independently verified</small></div>`
+  ).join("");
+  document.querySelector("#threat-map-empty").hidden = threatScope.assets.length > 0;
+  document.querySelector("#threat-assets-input").value = threatScope.assets.map((asset) => asset.value).join("\n");
+  document.querySelector("#scope-authorization").checked = threatScope.authorizationConfirmed;
+  document.querySelector("#scope-email-consent").checked = threatScope.emailConsentConfirmed;
+  document.querySelectorAll("[data-threat-source]").forEach((checkbox) => {
+    checkbox.checked = threatScope.sources.includes(checkbox.value);
+  });
+}
+
+function buildThreatScopeReport() {
+  const generatedAt = new Date().toISOString();
+  return `# Orbit threat-intelligence scope report\n\n` +
+    `- Status: **Scope only — no intelligence collected**\n` +
+    `- Generated: ${generatedAt}\n` +
+    `- Authorization attestation recorded locally: ${threatScope.authorizationConfirmed ? "Yes (unverified)" : "No"}\n` +
+    `- Email consent attestation recorded locally: ${threatScope.emailConsentConfirmed ? "Yes (unverified)" : "No"}\n\n` +
+    `## Authorized-scope draft\n\n${threatScope.assets.length ? threatScope.assets.map((asset) => `- ${asset.type}: \`${asset.value}\``).join("\n") : "- No assets"}\n\n` +
+    `## Requested transformation profile\n\n${threatScope.sources.length ? threatScope.sources.map((source) => `- ${source}`).join("\n") : "- No transformations selected"}\n\n` +
+    `## Findings and relationships\n\nNone. This browser prototype did not contact any source, verify control, run a transformation, or infer relationships.\n\n` +
+    `## Operational limitations\n\nThis report is a locally generated planning artifact, not a security assessment. Authorization checkboxes are self-attestations, not proof. A production backend must re-authorize every request, enforce provider allowlists, network egress controls, per-tenant budgets, rate limits, deadlines, cancellation, and immutable provenance.`;
 }
 
 function createAuditEvent(category, action, detail, actor = "Jamie Davis", timestamp = Date.now()) {
@@ -777,18 +864,20 @@ function renderAdminSettings() {
 }
 
 function openConsole(section) {
-  const titles = { insights: "Business insights", audit: "Activity & audit", admin: "Administration", access: "Identity & access", elastic: "Elastic logs · Incident response" };
+  const titles = { insights: "Business insights", audit: "Activity & audit", admin: "Administration", access: "Identity & access", threat: "Threat intelligence workflow", elastic: "Elastic logs · Incident response" };
   document.querySelector("#console-title").textContent = titles[section];
   document.querySelectorAll(".console-tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.consoleTab === section));
   document.querySelector("#insights-view").hidden = section !== "insights";
   document.querySelector("#audit-view").hidden = section !== "audit";
   document.querySelector("#admin-view").hidden = section !== "admin";
   document.querySelector("#access-view").hidden = section !== "access";
+  document.querySelector("#threat-view").hidden = section !== "threat";
   document.querySelector("#elastic-view").hidden = section !== "elastic";
   if (section === "insights") renderMetrics();
   if (section === "audit") renderAuditLog();
   if (section === "admin") renderAdminSettings();
   if (section === "access") renderAccessControl();
+  if (section === "threat") renderThreatScope();
   if (section === "elastic") renderElasticLogs();
   document.querySelector("#console-dialog").showModal();
 }
@@ -1086,37 +1175,37 @@ function validateBoardConfig(config) {
       if (limits[key] !== undefined && (!Number.isInteger(limits[key]) || limits[key] < minimum || limits[key] > maximum)) {
         throw new Error(`AI guardrail ${key} is outside the supported range.`);
       }
-      const agentApi = config.settings?.agentApi;
-      if (agentApi !== undefined) {
-        const ranges = {
-          requestsPerPrincipalPerMinute: [1, 30],
-          requestsPerWorkspacePerMinute: [1, 120],
-          maxConcurrentRuns: [1, 5],
-          minimumActionSpacingSeconds: [2, 120],
-          maximumQueuedRuns: [1, 100],
-          maximumRetries: [0, 3],
-        };
-        const fields = new Set([...Object.keys(ranges), "requireHumanApprovalForExternalWrites", "autoQueueApprovedRequests"]);
-        if (!agentApi || typeof agentApi !== "object" || Array.isArray(agentApi) || Object.keys(agentApi).some((key) => !fields.has(key))) {
-          throw new Error("Agent API settings contain unsupported fields.");
-        }
-        for (const [key, [minimum, maximum]] of Object.entries(ranges)) {
-          if (agentApi[key] !== undefined && (!Number.isInteger(agentApi[key]) || agentApi[key] < minimum || agentApi[key] > maximum)) {
-            throw new Error(`Agent API setting ${key} is outside the supported range.`);
-          }
-        }
-        for (const key of ["requireHumanApprovalForExternalWrites", "autoQueueApprovedRequests"]) {
-          if (agentApi[key] !== undefined && typeof agentApi[key] !== "boolean") throw new Error(`Agent API setting ${key} must be boolean.`);
-        }
-        const perAgent = agentApi.requestsPerPrincipalPerMinute;
-        const perWorkspace = agentApi.requestsPerWorkspacePerMinute;
-        if (perAgent !== undefined && perWorkspace !== undefined && perAgent > perWorkspace) {
-          throw new Error("Per-principal requests cannot exceed the workspace request cap.");
-        }
-      }
     }
     for (const key of ["requireHumanApproval", "validateOutput"]) {
       if (limits[key] !== undefined && typeof limits[key] !== "boolean") throw new Error(`AI guardrail ${key} must be boolean.`);
+    }
+  }
+  const agentApi = config.settings?.agentApi;
+  if (agentApi !== undefined) {
+    const ranges = {
+      requestsPerPrincipalPerMinute: [1, 30],
+      requestsPerWorkspacePerMinute: [1, 120],
+      maxConcurrentRuns: [1, 5],
+      minimumActionSpacingSeconds: [2, 120],
+      maximumQueuedRuns: [1, 100],
+      maximumRetries: [0, 3],
+    };
+    const fields = new Set([...Object.keys(ranges), "requireHumanApprovalForExternalWrites", "autoQueueApprovedRequests"]);
+    if (!agentApi || typeof agentApi !== "object" || Array.isArray(agentApi) || Object.keys(agentApi).some((key) => !fields.has(key))) {
+      throw new Error("Agent API settings contain unsupported fields.");
+    }
+    for (const [key, [minimum, maximum]] of Object.entries(ranges)) {
+      if (agentApi[key] !== undefined && (!Number.isInteger(agentApi[key]) || agentApi[key] < minimum || agentApi[key] > maximum)) {
+        throw new Error(`Agent API setting ${key} is outside the supported range.`);
+      }
+    }
+    for (const key of ["requireHumanApprovalForExternalWrites", "autoQueueApprovedRequests"]) {
+      if (agentApi[key] !== undefined && typeof agentApi[key] !== "boolean") throw new Error(`Agent API setting ${key} must be boolean.`);
+    }
+    const perAgent = agentApi.requestsPerPrincipalPerMinute;
+    const perWorkspace = agentApi.requestsPerWorkspacePerMinute;
+    if (perAgent !== undefined && perWorkspace !== undefined && perAgent > perWorkspace) {
+      throw new Error("Per-principal requests cannot exceed the workspace request cap.");
     }
   }
 }
@@ -1515,6 +1604,7 @@ document.querySelector("#copy-summary").addEventListener("click", async () => {
   }
 });
 document.querySelector("#analytics-nav").addEventListener("click", () => openConsole("insights"));
+document.querySelector("#threat-nav").addEventListener("click", () => openConsole("threat"));
 document.querySelector("#elastic-nav").addEventListener("click", () => openConsole("elastic"));
 document.querySelector("#admin-nav").addEventListener("click", () => openConsole("admin"));
 document.querySelectorAll("[data-console-tab]").forEach((tab) => {
@@ -1526,6 +1616,71 @@ document.querySelector("#refresh-metrics").addEventListener("click", () => {
 });
 document.querySelector("#audit-search").addEventListener("input", renderAuditLog);
 document.querySelector("#audit-filter").addEventListener("change", renderAuditLog);
+document.querySelector("#threat-scope-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  try {
+    const values = document.querySelector("#threat-assets-input").value.split(/\r?\n/).map((value) => value.trim()).filter(Boolean);
+    if (!values.length) throw new Error("Add at least one asset to the scope.");
+    if (values.length > 20) throw new Error("A local scope draft is limited to 20 assets.");
+    const assets = values.map(parseThreatAsset);
+    const uniqueAssets = [...new Map(assets.map((asset) => [`${asset.type}:${asset.value}`, asset])).values()];
+    const authorizationConfirmed = document.querySelector("#scope-authorization").checked;
+    const emailConsentConfirmed = document.querySelector("#scope-email-consent").checked;
+    if (!authorizationConfirmed) throw new Error("Confirm that you own these assets or have written authorization.");
+    if (uniqueAssets.some((asset) => asset.type === "email") && !emailConsentConfirmed) {
+      throw new Error("Confirm appropriate consent before including email addresses.");
+    }
+    const selectedSources = [...document.querySelectorAll("[data-threat-source]:checked")].map((checkbox) => checkbox.value);
+    threatScope = {
+      assets: uniqueAssets,
+      sources: selectedSources,
+      authorizationConfirmed,
+      emailConsentConfirmed,
+    };
+    persistThreatScope();
+    renderThreatScope();
+    recordAudit("security", "Threat scope draft saved", `${uniqueAssets.length} asset(s); local only, no source requests`);
+    showToast("Authorized scope draft saved locally");
+  } catch (error) {
+    console.error("Threat scope validation failed.", error);
+    showToast(error.message);
+  }
+});
+document.querySelector("#threat-assets-list").addEventListener("click", (event) => {
+  const button = event.target.closest("[data-remove-threat-asset]");
+  if (!button) return;
+  const [removed] = threatScope.assets.splice(Number(button.dataset.removeThreatAsset), 1);
+  if (!removed) return;
+  persistThreatScope();
+  renderThreatScope();
+  recordAudit("security", "Threat scope asset removed", `${removed.type} removed from local scope draft`);
+  showToast("Scope asset removed");
+});
+document.querySelector("#threat-assets-input").addEventListener("input", () => {
+  threatScope.authorizationConfirmed = false;
+  threatScope.emailConsentConfirmed = false;
+  document.querySelector("#scope-authorization").checked = false;
+  document.querySelector("#scope-email-consent").checked = false;
+});
+document.querySelectorAll("[data-threat-source]").forEach((checkbox) => {
+  checkbox.addEventListener("change", () => {
+    threatScope.sources = [...document.querySelectorAll("[data-threat-source]:checked")].map((item) => item.value);
+    persistThreatScope();
+    recordAudit("security", "Threat transformation profile updated", `${threatScope.sources.length} source(s) selected; no run queued`);
+  });
+});
+document.querySelector("#refresh-threat-map").addEventListener("click", () => {
+  renderThreatScope();
+  showToast("Scope refreshed · no intelligence sources are connected");
+});
+document.querySelector("#queue-threat-run").addEventListener("click", () => {
+  showToast("Threat-intel backend is not connected; no run was queued");
+});
+document.querySelector("#export-threat-report").addEventListener("click", () => {
+  download("orbit-threat-scope-report.md", buildThreatScopeReport(), "text/markdown;charset=utf-8");
+  recordAudit("security", "Threat scope report exported", "Scope-only report; no intelligence collected");
+  showToast("Scope-only report exported");
+});
 document.querySelector("#export-audit").addEventListener("click", () => {
   download("orbit-audit.ecs.ndjson", auditEvents.map((event) => JSON.stringify(event)).join("\n") + "\n", "application/x-ndjson;charset=utf-8");
   showToast("ECS event log exported");
@@ -1884,6 +2039,7 @@ try {
 }
 
 document.querySelector("#share-link-preview").textContent = `${window.location.host || "local board"}/#board=…`;
+renderThreatScope();
 renderChat();
 renderSubscribers();
 renderBoardIdentity();
