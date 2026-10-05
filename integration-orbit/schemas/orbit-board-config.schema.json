@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tyfoon-sec.github.io/Projects/integration-orbit/schemas/orbit-board-config.schema.json",
+  "title": "Orbit board configuration",
+  "description": "Portable board metadata and task definitions. Credentials and provider secrets are intentionally unsupported.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "board", "tasks"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "const": 1
+    },
+    "board": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 240
+        }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/task"
+      }
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "aiGuardrails": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "maxTokens": {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 50000
+            },
+            "maxRuntimeMinutes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60
+            },
+            "dailyTokenBudget": {
+              "type": "integer",
+              "minimum": 10000,
+              "maximum": 1000000
+            },
+            "maxConcurrentRuns": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3
+            },
+            "requireHumanApproval": {
+              "type": "boolean"
+            },
+            "validateOutput": {
+              "type": "boolean"
+            }
+          }
+        },
+        "agentApi": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "requestsPerPrincipalPerMinute": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            },
+            "requestsPerWorkspacePerMinute": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 120
+            },
+            "maxConcurrentRuns": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "minimumActionSpacingSeconds": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 120
+            },
+            "maximumQueuedRuns": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "maximumRetries": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "requireHumanApprovalForExternalWrites": {
+              "type": "boolean"
+            },
+            "autoQueueApprovedRequests": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "status"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "status": {
+          "enum": ["todo", "doing", "done"]
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "priority": {
+          "enum": ["High", "Medium", "Low"]
+        },
+        "assignee": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "due": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    }
+  }
+}

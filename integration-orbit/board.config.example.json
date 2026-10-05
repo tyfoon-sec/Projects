@@ -1,0 +1,52 @@
+{
+  "$schema": "./schemas/orbit-board-config.schema.json",
+  "version": 1,
+  "board": {
+    "name": "Website launch",
+    "description": "Coordinate secure, reviewable work for the website launch."
+  },
+  "tasks": [
+    {
+      "title": "Review analytics event schema",
+      "description": "Agree on shared event names and tenant scope.",
+      "status": "todo",
+      "label": "Analytics",
+      "priority": "High"
+    },
+    {
+      "title": "Build launch dashboard",
+      "description": "Create a Grafana-style summary of delivery metrics.",
+      "status": "doing",
+      "label": "Analytics",
+      "priority": "Medium",
+      "assignee": "Morgan Kim"
+    },
+    {
+      "title": "Confirm repository permissions",
+      "description": "Check least-privilege access for the deployment workflow.",
+      "status": "done",
+      "label": "Security",
+      "priority": "High"
+    }
+  ],
+  "settings": {
+    "aiGuardrails": {
+      "maxTokens": 8000,
+      "maxRuntimeMinutes": 5,
+      "dailyTokenBudget": 50000,
+      "maxConcurrentRuns": 1,
+      "requireHumanApproval": true,
+      "validateOutput": true
+    },
+    "agentApi": {
+      "requestsPerPrincipalPerMinute": 6,
+      "requestsPerWorkspacePerMinute": 20,
+      "maxConcurrentRuns": 2,
+      "minimumActionSpacingSeconds": 10,
+      "maximumQueuedRuns": 10,
+      "maximumRetries": 1,
+      "requireHumanApprovalForExternalWrites": true,
+      "autoQueueApprovedRequests": true
+    }
+  }
+}

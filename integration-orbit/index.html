@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f8fc">
+    <title>Orbit — Intelligent Integration &amp; Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#" aria-label="Orbit home">
+          <span class="brand-mark"><span></span><span></span><span></span><span></span></span>
+          <span class="brand-name">orbit<span class="brand-period">.</span><small>Intelligent Integration &amp; Management</small></span>
+        </a>
+
+        <button class="workspace-switcher" type="button">
+          <span class="workspace-icon">S</span>
+          <span class="workspace-copy"><strong>Studio North</strong><small>Free workspace</small></span>
+          <span class="chevrons">⌃<br>⌄</span>
+        </button>
+
+        <nav class="main-nav" aria-label="Main navigation">
+          <a class="nav-item active" href="#"><span class="nav-icon">▦</span> My boards <span class="nav-count">4</span></a>
+          <a class="nav-item" href="#"><span class="nav-icon">◷</span> My tasks <span class="nav-count">3</span></a>
+          <a class="nav-item" href="#"><span class="nav-icon">⌕</span> Search</a>
+          <button class="nav-item" id="analytics-nav" type="button" title="Business insights" aria-label="Business insights"><span class="nav-icon">▥</span> Business insights</button>
+          <button class="nav-item" id="elastic-nav" type="button" title="Elastic logs and incident response" aria-label="Elastic logs and incident response"><span class="nav-icon">⌁</span> Elastic logs</button>
+          <button class="nav-item" id="admin-nav" type="button" title="Administration and audit" aria-label="Administration and audit"><span class="nav-icon">⚙</span> Admin &amp; audit</button>
+        </nav>
+
+        <div class="side-section">
+          <div class="section-label">YOUR BOARDS <button class="tiny-plus" type="button" aria-label="Add board">+</button></div>
+          <a class="board-link selected" href="#"><span class="board-dot dot-violet"></span> <span id="sidebar-board-title">Product launch</span> <span class="board-more">···</span></a>
+          <a class="board-link" href="#"><span class="board-dot dot-orange"></span> Website refresh</a>
+          <a class="board-link" href="#"><span class="board-dot dot-teal"></span> Q3 planning</a>
+          <button class="add-board" type="button"><span>＋</span> Create a board</button>
+        </div>
+
+        <div class="sidebar-bottom">
+        <a class="github-hosting" href="https://github.com/tyfoon-sec/Projects" target="_blank" rel="noopener noreferrer">
+          <span class="github-mark">⌘</span><span><strong>Hosted on GitHub</strong><small>View project repository</small></span><span class="external-arrow">↗</span>
+        </a>
+        <div class="upgrade-card">
+            <span class="upgrade-spark">✦</span>
+            <strong>Make room for more</strong>
+            <p>Invite your team and build better things together.</p>
+            <button type="button" class="upgrade-button">Explore plans <span>→</span></button>
+          </div>
+          <button class="profile-button" type="button">
+            <span class="avatar avatar-you">JD</span>
+            <span class="profile-copy"><strong>Jamie Davis</strong><small>Personal workspace</small></span>
+            <span class="profile-more">···</span>
+          </button>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div class="breadcrumbs"><span>My boards</span><span class="crumb-slash">/</span><strong id="breadcrumb-board-title">Product launch</strong></div>
+          <div class="topbar-actions">
+            <label class="search-field"><span>⌕</span><input id="search-input" type="search" placeholder="Search anything..." aria-label="Search tasks"><kbd>⌘ K</kbd></label>
+            <button class="icon-button notification-button" type="button" aria-label="Notifications">♧<i></i></button>
+            <span class="topbar-divider"></span>
+            <button class="help-button" type="button" aria-label="Help">?</button>
+          </div>
+        </header>
+
+        <section class="board-page">
+          <div class="board-heading">
+            <div>
+              <div class="board-eyebrow"><span class="board-dot dot-violet"></span> PRODUCT TEAM <span class="eyebrow-separator">·</span> UPDATED 2 HOURS AGO</div>
+              <div class="title-row"><h1 id="board-title">Product launch</h1><button class="title-chevron" aria-label="Board options">⌄</button></div>
+              <p class="board-description" id="board-description">Everything we need to make launch day a success.</p>
+            </div>
+            <div class="heading-actions">
+              <div class="avatar-stack" aria-label="Board members">
+                <span class="avatar avatar-pink">AL</span><span class="avatar avatar-blue">MK</span><span class="avatar avatar-yellow">JR</span><span class="avatar avatar-green">TS</span><span class="avatar avatar-overflow">+3</span>
+              </div>
+              <button class="button button-outline invite-button" id="invite-button"><span>＋</span> Invite</button>
+              <button class="button button-primary" id="share-button"><span class="share-glyph">↗</span> Share board</button>
+            </div>
+          </div>
+
+          <div class="board-toolbar">
+            <div class="view-tabs"><button class="view-tab active"><span>▦</span> Board</button><button class="view-tab"><span>☷</span> List</button><button class="view-tab"><span>▤</span> Timeline</button><button class="view-add" aria-label="Add view">＋</button></div>
+            <div class="toolbar-actions">
+                <button class="toolbar-button generate-toggle" id="generate-tickets-button"><span>✦</span> Generate tickets</button>
+                <button class="toolbar-button communication-toggle" id="communication-button"><span>☷</span> Discuss <span class="message-badge" id="message-badge">2</span></button>
+                <button class="toolbar-button" id="filter-button"><span>☷</span> Filter <span class="filter-count" id="filter-count"></span></button>
+              <button class="toolbar-button" id="sort-button"><span>↕</span> Sort</button>
+              <span class="toolbar-separator"></span>
+              <button class="toolbar-icon" id="import-button" title="Import Markdown or JSON" aria-label="Import board">⇧</button>
+              <button class="toolbar-icon" id="export-button" title="Export board as Markdown" aria-label="Export board">⇩</button>
+              <button class="toolbar-icon more-button" aria-label="More options">···</button>
+            </div>
+          </div>
+
+          <div class="board-columns" id="board-columns" aria-label="Kanban board"></div>
+          <input id="file-input" type="file" accept=".md,.markdown,.txt,.json,application/json,text/markdown,text/plain" hidden>
+        </section>
+        <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      </main>
+    </div>
+
+    <aside class="communication-panel" id="communication-panel" aria-label="Team communication" aria-hidden="true">
+      <div class="communication-header">
+        <div><div class="dialog-kicker">PRODUCT LAUNCH</div><h2>Team space</h2></div>
+        <button type="button" class="dialog-close" id="close-communication" aria-label="Close communication panel">×</button>
+      </div>
+      <div class="communication-tabs" role="tablist" aria-label="Communication tools">
+        <button type="button" class="communication-tab active" id="messages-tab" role="tab" aria-selected="true">Messages <span id="message-tab-count">2</span></button>
+        <button type="button" class="communication-tab" id="email-tab" role="tab" aria-selected="false">Email digests</button>
+      </div>
+      <section class="communication-view" id="messages-view" role="tabpanel" aria-labelledby="messages-tab">
+        <div class="channel-picker-row"><span class="channel-label">CHANNEL</span>
+          <select id="channel-select" aria-label="Choose communication channel">
+            <option value="team"># launch-team</option>
+            <option value="github-issues">GitHub · Issues</option>
+            <option value="github-discussions">GitHub · Discussions</option>
+          </select>
+        </div>
+        <div class="github-channel-note" id="github-channel-note" hidden>
+          <span class="github-note-icon">⌘</span>
+          <div><strong>Continue the conversation on GitHub</strong><p>Open the project’s public GitHub channel. Messages there are visible to repository members.</p>
+            <a id="github-channel-link" href="https://github.com/tyfoon-sec/Projects/issues" target="_blank" rel="noopener noreferrer">Open GitHub channel <span>↗</span></a>
+          </div>
+        </div>
+        <div class="chat-messages" id="chat-messages" aria-live="polite"></div>
+        <form class="chat-composer" id="chat-form">
+          <textarea id="chat-input" rows="2" maxlength="1000" placeholder="Message #launch-team…" aria-label="Write a team message"></textarea>
+          <div class="composer-actions"><span>Enter to send · Shift + Enter for new line</span><button type="submit" aria-label="Send message">↑</button></div>
+        </form>
+        <div class="local-chat-note">Demo chat is local only. Don't post secrets or private data to public GitHub channels.</div>
+      </section>
+      <section class="communication-view email-view" id="email-view" role="tabpanel" aria-labelledby="email-tab" hidden>
+        <div class="digest-intro"><span class="digest-icon">✉</span><div><strong>Stay in the loop</strong><p>Get a useful roundup of task movement and team discussion.</p></div></div>
+        <div class="email-settings">
+          <label class="field-label" for="digest-frequency">SEND ME A SUMMARY</label>
+          <select id="digest-frequency"><option value="daily">Daily summary</option><option value="weekly">Weekly summary</option><option value="important">Important updates only</option></select>
+          <label class="field-label">SUBSCRIBE TO</label>
+          <label class="subscription-choice"><input type="checkbox" value="status" checked> Task status changes <span>When a task moves between columns</span></label>
+          <label class="subscription-choice"><input type="checkbox" value="comments" checked> New comments <span>Discussion added to a task</span></label>
+          <label class="subscription-choice"><input type="checkbox" value="digest" checked> Board summaries <span>A progress recap on your schedule</span></label>
+          <label class="field-label subscriber-heading">SUBSCRIBERS <span id="subscriber-count">0</span></label>
+          <div class="subscriber-list" id="subscriber-list"></div>
+          <form class="subscriber-form" id="subscriber-form"><input type="email" id="subscriber-email" required placeholder="name@company.com" aria-label="Email address to subscribe"><button type="submit" aria-label="Add subscriber">＋</button></form>
+          <button type="button" class="button button-outline generate-summary" id="generate-summary">Preview email summary <span>→</span></button>
+        </div>
+        <div class="digest-preview" id="digest-preview" hidden>
+          <div class="preview-heading"><strong>Email preview</strong><button type="button" id="copy-summary">Copy</button></div>
+          <pre id="summary-content"></pre>
+          <p>Email delivery needs a configured mail service; this preview is not sent.</p>
+        </div>
+        <div class="local-chat-note email-note">Subscription preferences are stored in this browser. Connect an email provider to deliver summaries.</div>
+      </section>
+    </aside>
+    <div class="panel-backdrop" id="panel-backdrop"></div>
+
+    <dialog class="console-dialog" id="console-dialog">
+      <div class="console-shell">
+        <header class="console-header">
+          <div class="console-heading"><span class="console-brand-mark">◈</span><div><div class="dialog-kicker">INTELLIGENT INTEGRATION &amp; MANAGEMENT</div><h2 id="console-title">Business insights</h2></div></div>
+          <div class="console-header-actions"><span class="console-live-indicator"><i></i> Local board data</span><button type="button" class="dialog-close" data-close aria-label="Close">×</button></div>
+        </header>
+        <nav class="console-tabs" aria-label="Workspace console sections">
+          <button type="button" class="console-tab active" data-console-tab="insights">Overview</button>
+          <button type="button" class="console-tab" data-console-tab="audit">Audit log <span id="audit-count">0</span></button>
+          <button type="button" class="console-tab" data-console-tab="admin">Administration</button>
+          <button type="button" class="console-tab" data-console-tab="access">Access control</button>
+          <button type="button" class="console-tab elastic-tab" data-console-tab="elastic">Elastic logs <span id="elastic-count">0</span></button>
+        </nav>
+        <section class="console-view insights-view" id="insights-view">
+          <div class="insights-intro"><div><h3>Shared workspace intelligence</h3><p>Coordinate bots, LLMs, and independent AI/software-intelligence tools with permissioned analytics.</p></div><span class="shared-audience"><span>♙</span> People + approved bots</span><button type="button" class="console-refresh" id="refresh-metrics">↻ Refresh</button></div>
+          <div class="metrics-grid" id="metrics-grid"></div>
+          <div class="charts-grid">
+            <article class="chart-card"><div class="chart-title"><div><strong>Work by status</strong><span>Current tasks across the workflow</span></div><span class="chart-menu">···</span></div><div id="status-chart" class="status-chart"></div></article>
+            <article class="chart-card"><div class="chart-title"><div><strong>Work by category</strong><span>Task distribution by label</span></div><span class="chart-menu">···</span></div><div id="category-chart" class="category-chart"></div></article>
+          </div>
+          <div class="charts-grid lower-charts">
+            <article class="chart-card activity-chart-card"><div class="chart-title"><div><strong>Team activity</strong><span>Recorded board actions · last 7 days</span></div><span class="chart-menu">···</span></div><div id="activity-chart" class="activity-chart"></div></article>
+            <article class="pipeline-card"><div class="pipeline-title"><span class="pipeline-glyph">◉</span><div><strong>Analytics + observability</strong><small>Shared event data · ML features · Grafana metrics</small></div></div>
+              <div class="shared-data-flow"><span>Tasks + audited events</span><b>→</b><span>Scoped analytics API</span><b>→</b><span>People + bots</span></div>
+              <div class="pipeline-flow"><span class="pipeline-node"><b>T</b> Telegraf</span><span class="pipeline-connector"></span><span class="pipeline-node"><b>I</b> InfluxDB</span><span class="pipeline-connector"></span><span class="pipeline-node"><b>G</b> Grafana</span></div>
+              <div class="pipeline-status"><i></i><span><strong>Shared analytics: local preview</strong><small>TIG / ML services are not connected; no bot data is exposed yet.</small></span></div>
+              <a href="https://grafana.com/" target="_blank" rel="noopener noreferrer" class="grafana-link">Explore Grafana <span>↗</span></a>
+            </article>
+          </div>
+          <div class="metrics-footnote">Shared task metrics are calculated here. A production service should publish tenant-scoped, read-only analytics and approved ML features through one authenticated API for bots and users. Tokens, costs, latency, and GitHub telemetry remain unavailable until securely collected.</div>
+        </section>
+        <section class="console-view audit-view" id="audit-view" hidden>
+          <div class="insights-intro"><div><h3>Activity &amp; audit log</h3><p>ECS-aligned event fields · JSON Lines export · local demo records</p></div><button type="button" class="console-export" id="export-audit">↓ Export ECS NDJSON</button></div>
+          <div class="audit-toolbar"><label class="audit-search">⌕ <input id="audit-search" type="search" placeholder="Search activity…"></label><select id="audit-filter" aria-label="Filter audit events"><option value="all">All activity</option><option value="task">Task changes</option><option value="communication">Communication</option><option value="settings">Settings</option><option value="security">Security</option></select></div>
+          <div class="audit-table-wrap"><table class="audit-table"><thead><tr><th>EVENT</th><th>ACTOR</th><th>DETAIL</th><th>TIME</th></tr></thead><tbody id="audit-table-body"></tbody></table><div class="audit-empty" id="audit-empty" hidden>No matching activity found.</div></div>
+          <div class="audit-footnote">Audit records are local to this browser and are not tamper-resistant. Production audit logs should be append-only, access-controlled, and centrally retained.</div>
+        </section>
+        <section class="console-view elastic-view" id="elastic-view" hidden>
+          <div class="elastic-page-heading">
+            <div><div class="elastic-breadcrumb">SECURITY OPERATIONS <span>/</span> EVENT EXPLORER</div><h3>Elastic log catalog</h3><p>Investigate identity, access, task changes, and workspace activity.</p></div>
+            <div class="elastic-actions"><span class="elastic-demo-badge"><i></i> Browser-local preview</span><button type="button" id="import-ecs-logs" class="console-export">↑ Import ECS logs</button><button type="button" id="export-ecs-filtered" class="console-export">↓ Export NDJSON</button></div>
+          </div>
+          <div class="elastic-availability"><span>ⓘ</span> No Elasticsearch cluster is connected. Events below are local demo/audit records; IP, network, and identity-provider telemetry is not collected.</div>
+          <div class="elastic-toolbar">
+            <label class="elastic-query">⌕ <input id="elastic-query" type="search" placeholder="Search event metadata, user, action, or message…" aria-label="Search event metadata"><kbd>Enter</kbd></label>
+            <select id="elastic-time" aria-label="Time range"><option value="15m">Last 15 minutes</option><option value="24h" selected>Last 24 hours</option><option value="7d">Last 7 days</option><option value="all">All local events</option></select>
+            <select id="elastic-severity" aria-label="Filter severity"><option value="all">All severities</option><option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>
+            <select id="elastic-category" aria-label="Filter event category"><option value="all">All event categories</option><option value="iam">Identity &amp; access</option><option value="configuration">Configuration</option><option value="web">Communication</option><option value="process">Task workflow</option></select>
+          </div>
+          <div class="elastic-kpis" id="elastic-kpis"></div>
+          <div class="elastic-timeline-card"><div class="elastic-card-heading"><div><strong>Event timeline</strong><small>Events by time · selected range</small></div><span id="elastic-range-label">24 hours</span></div><div id="elastic-timeline" class="elastic-timeline"></div><div id="elastic-timeline-labels" class="elastic-timeline-labels"></div></div>
+          <div class="elastic-results-heading"><strong>Events <span id="elastic-result-count">0</span></strong><span>Newest first · select a row to inspect the full document</span></div>
+          <div class="elastic-table-wrap"><table class="elastic-table"><thead><tr><th>TIME</th><th>SEV</th><th>EVENT / ACTION</th><th>USER / PRINCIPAL</th><th>SOURCE</th><th>OUTCOME</th></tr></thead><tbody id="elastic-event-rows"></tbody></table><div id="elastic-empty" class="audit-empty" hidden>No events match these filters.</div></div>
+          <div class="elastic-event-detail" id="elastic-event-detail" hidden></div>
+          <div class="elastic-ir-footnote">For rapid incident response, stream authenticated ECS events to a centrally managed Elastic/SIEM cluster, preserve immutable originals, synchronize clocks, enrich identity/network telemetry, and apply access/retention controls. This local browser view is not an IR system of record.</div>
+          <input type="file" id="ecs-log-file" accept=".json,.ndjson,.jsonl,application/json,application/x-ndjson" hidden>
+        </section>
+        <section class="console-view admin-view" id="admin-view" hidden>
+          <div class="insights-intro"><div><h3>Workspace administration</h3><p>Manage board identity, member roles, data handling, and integration boundaries.</p></div></div>
+          <div class="admin-grid">
+            <form class="admin-card board-settings" id="board-settings-form"><div class="admin-card-heading"><span class="admin-card-icon">▤</span><div><strong>Board settings</strong><small>Customize this workspace</small></div></div>
+              <label>BOARD NAME<input id="admin-board-name" maxlength="80" required></label><label>DESCRIPTION<textarea id="admin-board-description" maxlength="240" rows="2"></textarea></label>
+              <label>ACTIVITY RETENTION<select id="retention-days"><option value="30">30 days</option><option value="90">90 days</option><option value="365">1 year</option></select></label>
+              <div class="admin-actions"><button class="button button-primary" type="submit">Save settings</button><button type="button" class="button button-outline" id="export-config">Export JSON config</button></div>
+            </form>
+            <section class="admin-card members-card"><div class="admin-card-heading"><span class="admin-card-icon">♙</span><div><strong>Workspace access</strong><small>Demo roles · local only</small></div></div><div id="member-list" class="member-list"></div>
+              <form class="member-add-form" id="member-add-form"><input type="email" id="member-email" required placeholder="Add teammate email" aria-label="Teammate email"><select id="member-role" aria-label="New member role"><option>Member</option><option>Viewer</option><option>Admin</option><option>Analytics bot</option></select><button type="submit" aria-label="Add teammate">＋</button></form>
+            </section>
+            <section class="admin-card security-settings"><div class="admin-card-heading"><span class="admin-card-icon security-icon">⌑</span><div><strong>Security &amp; data policy</strong><small>Saved preferences are not enforcement</small></div></div>
+              <label><input type="checkbox" id="mask-sensitive-data" checked><span><strong>Mask sensitive values in summaries</strong><small>Never share credentials in public channels</small></span></label>
+              <label><input type="checkbox" id="log-external-actions" checked><span><strong>Audit external tool actions</strong><small>Record approved GitHub and integration writes</small></span></label>
+              <label><input type="checkbox" id="restrict-integrations" checked><span><strong>Restrict to approved integrations</strong><small>Use repository-scoped permissions</small></span></label>
+              <label><input type="checkbox" id="share-analytics-bots" checked><span><strong>Share approved analytics with bots</strong><small>Read-only, scoped data; never raw secrets</small></span></label>
+              <div class="security-callout">Production needs authenticated users, server-enforced roles, encrypted transport, secret isolation, and centrally protected logs.</div>
+            </section>
+            <section class="admin-card connectors-card"><div class="admin-card-heading"><span class="admin-card-icon">⌘</span><div><strong>Connected services</strong><small>Repository and observability sources</small></div></div>
+              <div class="connector-row"><span class="connector-icon github-small">⌘</span><span><strong>GitHub repository</strong><small>tyfoon-sec/Projects · Pages workflow</small></span><span class="connector-state connected-state">Linked</span></div>
+              <div class="connector-row"><span class="connector-icon influx-small">I</span><span><strong>TIG metrics backend</strong><small>Telegraf · InfluxDB · Grafana</small></span><span class="connector-state disconnected-state">Not connected</span></div>
+              <div class="connector-row"><span class="connector-icon model-small">ML</span><span><strong>ML &amp; independent agents</strong><small>Approved integrations · scoped analytics API</small></span><span class="connector-state disconnected-state">Not connected</span></div>
+              <p class="connector-note">Connect a protected collector endpoint to aggregate metrics. Do not put database credentials in this static page.</p>
+            </section>
+            <section class="admin-card agent-api-card"><div class="admin-card-heading"><span class="admin-card-icon">⇄</span><div><strong>Agent API &amp; human-speed limits</strong><small>Queue bounded work across approved bots and services</small></div><a class="openapi-link" href="./api/openapi.yaml" target="_blank" rel="noopener noreferrer">OpenAPI 3.1 ↗</a></div>
+              <div class="api-automation-flow"><span>Human request</span><b>→</b><span>Rate-limited queue</span><b>→</b><span>Scoped agent runner</span><b>→</b><span>Audit + shared analytics</span></div>
+              <div class="api-limits-grid">
+                <label>CALLS / AGENT / MIN<input id="api-agent-rate" type="number" min="1" max="30" value="6"></label>
+                <label>WORKSPACE CALLS / MIN<input id="api-workspace-rate" type="number" min="1" max="120" value="20"></label>
+                <label>MAX PARALLEL RUNS<input id="api-concurrency" type="number" min="1" max="5" value="2"></label>
+                <label>MIN ACTION SPACING · SEC<input id="api-action-delay" type="number" min="2" max="120" value="10"></label>
+                <label>MAX QUEUED RUNS<input id="api-queue-size" type="number" min="1" max="100" value="10"></label>
+                <label>MAX RETRIES<input id="api-max-retries" type="number" min="0" max="3" value="1"></label>
+              </div>
+              <div class="api-controls"><label><input type="checkbox" id="api-human-writes" checked> Require human approval before external writes</label><label><input type="checkbox" id="api-auto-queue" checked> Auto-queue approved workflow requests</label><button type="button" class="button button-outline" id="save-api-policy">Save rate policy</button></div>
+              <div class="api-safety-note"><strong>Contract behavior:</strong> per-agent + workspace rate limits return <code>429</code> with <code>Retry-After</code>; requests use idempotency keys, bounded retries, scoped tokens, and audited cancellation. Settings here are a local preview until enforced by the API service.</div>
+            </section>
+          </div>
+        </section>
+        <section class="console-view access-view" id="access-view" hidden>
+          <div class="insights-intro"><div><h3>Identity &amp; access control</h3><p>Directory-style groups and granular permissions for people and automation.</p></div><span class="access-mode-label">DEMO · NOT ENFORCED</span></div>
+          <div class="identity-provider-grid">
+            <article class="identity-provider-card"><span class="idp-mark github-idp">⌘</span><div><strong>GitHub OAuth</strong><small>Sign in with your organization identity</small></div><span class="connector-state disconnected-state">Not configured</span><button type="button" data-idp="GitHub OAuth">Configure</button></article>
+            <article class="identity-provider-card"><span class="idp-mark google-idp">G</span><div><strong>Google OpenID Connect</strong><small>Use Google Workspace authentication</small></div><span class="connector-state disconnected-state">Not configured</span><button type="button" data-idp="Google OIDC">Configure</button></article>
+          </div>
+          <div class="access-security-note"><strong>Secure by design:</strong> use server-side OAuth/OIDC with PKCE, short-lived sessions, MFA policy, and secret storage. The static prototype performs no authentication and never stores OAuth client secrets.</div>
+          <div class="access-toolbar"><div><h4>Access policy matrix</h4><p>Explicit per-group and per-person capabilities. Group membership is shown below.</p></div><span class="access-legend">🔒 Changes are local demo settings</span></div>
+          <div class="permission-matrix-wrap"><table class="permission-matrix"><thead><tr><th>GROUP / PERSON</th><th>Read board</th><th>Edit tasks</th><th>Discuss</th><th>View analytics</th><th>Run bots</th><th>Manage access</th></tr></thead><tbody id="permission-matrix"></tbody></table></div>
+          <div class="groups-admin-grid">
+            <section class="admin-card groups-card"><div class="admin-card-heading"><span class="admin-card-icon">♧</span><div><strong>Directory groups</strong><small>LDAP-style names and membership</small></div></div>
+              <div id="directory-groups"></div>
+              <form class="group-add-form" id="group-add-form"><input id="group-name" required maxlength="60" placeholder="New group name" aria-label="New group name"><button type="submit">Create group</button></form>
+            </section>
+            <section class="admin-card acl-guidance"><div class="admin-card-heading"><span class="admin-card-icon security-icon">⌑</span><div><strong>Identity integration boundary</strong><small>Central directory is the source of truth</small></div></div>
+              <ul><li>Map OAuth identities to users and directory groups.</li><li>Resolve group membership server-side on every request.</li><li>Apply least-privilege scopes to bot and analytics APIs.</li><li>Record policy changes in a protected SIEM event stream.</li></ul>
+              <div class="security-callout">Do not treat these browser-managed groups or checkboxes as access controls until a backend enforces them.</div>
+            </section>
+          </div>
+        </section>
+      </div>
+    </dialog>
+
+    <dialog class="task-dialog" id="task-dialog">
+      <form method="dialog" class="dialog-form" id="task-form">
+        <div class="dialog-topline"><span class="dialog-kicker" id="dialog-kicker">TASK DETAILS</span><button type="button" class="dialog-close" data-close aria-label="Close">×</button></div>
+        <input id="task-title-input" class="task-title-input" placeholder="Task name" required maxlength="120">
+        <textarea id="task-description-input" class="task-description-input" placeholder="Add a description..."></textarea>
+        <div class="task-meta-grid">
+          <label>STATUS<select id="task-status-input"><option value="todo">To do</option><option value="doing">In progress</option><option value="done">Done</option></select></label>
+          <label>PRIORITY<select id="task-priority-input"><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select></label>
+          <label>ASSIGNEE<input id="task-assignee-input" placeholder="Name"></label>
+          <label>DUE DATE<input id="task-due-input" type="date"></label>
+        </div>
+        <div class="dialog-discussion">
+          <div class="discussion-heading"><strong>Discussion</strong><span id="comment-count">0 comments</span></div>
+          <div class="comment-list" id="comment-list"></div>
+          <div class="comment-composer"><span class="avatar avatar-you">JD</span><textarea id="comment-input" placeholder="Write a comment..."></textarea><button type="button" id="send-comment" aria-label="Send comment">↑</button></div>
+        </div>
+        <div class="dialog-footer"><button type="button" class="delete-task" id="delete-task">Delete task</button><span class="dialog-footer-spacer"></span><button type="button" class="button button-outline" data-close>Cancel</button><button type="submit" class="button button-primary">Save changes</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="share-dialog" id="share-dialog">
+      <div class="share-dialog-content">
+        <div class="dialog-topline"><span class="dialog-kicker">SHARE YOUR BOARD</span><button type="button" class="dialog-close" data-close aria-label="Close">×</button></div>
+        <h2>Keep everyone in the loop.</h2>
+        <p>Share a portable snapshot of this board. Anyone with the link can open it in Orbit.</p>
+        <div class="share-link-row"><span id="share-link-preview">orbit.app/board/product-launch</span><button type="button" id="copy-link-button">Copy link</button></div>
+        <div class="share-options">
+          <button type="button" class="share-option" data-share="slack"><span class="share-option-icon slack-icon">✳</span><span><strong>Slack</strong><small>Copy a message for your channel</small></span><span class="share-arrow">↗</span></button>
+          <button type="button" class="share-option" data-share="teams"><span class="share-option-icon teams-icon">T</span><span><strong>Microsoft Teams</strong><small>Copy a message to share in chat</small></span><span class="share-arrow">↗</span></button>
+          <button type="button" class="share-option" data-share="discord"><span class="share-option-icon discord-icon">◉</span><span><strong>Discord</strong><small>Copy a message for your server</small></span><span class="share-arrow">↗</span></button>
+        </div>
+        <div class="share-note"><span>ⓘ</span> Share links include a snapshot of tasks and discussion, not live sync.</div>
+      </div>
+    </dialog>
+
+    <dialog class="ai-dialog" id="ai-dialog">
+      <div class="ai-dialog-content">
+        <div class="dialog-topline"><span class="dialog-kicker">AI WORKFLOW · GUARDED</span><button type="button" class="dialog-close" data-close aria-label="Close">×</button></div>
+        <h2>Turn a brief into tickets.</h2>
+        <p class="ai-intro">Coordinate bot automation, LLMs, and independent AI or software-intelligence tools. Keep every run inside clear time, cost, and quality limits.</p>
+        <label class="field-label" for="ticket-brief">PROJECT BRIEF OR CHECKLIST</label>
+        <textarea class="ticket-brief" id="ticket-brief" placeholder="Paste a short brief or a list of outcomes…&#10;&#10;Example:&#10;- Finalize launch messaging&#10;- Build the product landing page&#10;- Test the sign-up flow"></textarea>
+        <div class="generator-actions"><label class="field-label" for="ticket-limit">MAX TICKETS <select id="ticket-limit"><option>3</option><option selected>5</option><option>8</option><option>10</option></select></label><button type="button" class="button button-outline" id="preview-tickets">Preview breakdown</button></div>
+        <div class="ticket-preview" id="ticket-preview" hidden></div>
+        <div class="guardrail-heading"><div><strong>Time · cost · quality</strong><span>Limits for a future server-side AI runner</span></div><span class="guardrail-lock">⌑ Guardrails</span></div>
+        <div class="guardrail-grid">
+          <label>MAX TOKENS / RUN<input id="max-tokens" type="number" min="1000" max="50000" step="1000" value="8000"></label>
+          <label>TIME LIMIT / RUN · MIN<input id="max-runtime" type="number" min="1" max="60" value="5"></label>
+          <label>DAILY TOKEN CEILING<input id="daily-budget" type="number" min="10000" max="1000000" step="10000" value="50000"></label>
+          <label>MAX PARALLEL RUNS<select id="max-concurrency"><option value="1" selected>1 run</option><option value="2">2 runs</option><option value="3">3 runs</option></select></label>
+        </div>
+        <div class="guardrail-toggles">
+          <label><input id="approval-required" type="checkbox" checked><span><strong>Require human approval</strong><small>Review generated tickets before adding them</small></span></label>
+          <label><input id="stop-on-stall" type="checkbox" checked><span><strong>Stop on stalled session</strong><small>End a run if it repeats or makes no progress</small></span></label>
+          <label><input id="validate-output" type="checkbox" checked><span><strong>Validate output quality</strong><small>Reject empty, malformed, or duplicate tickets</small></span></label>
+        </div>
+        <div class="tool-policy">
+          <div class="tool-policy-heading"><span class="github-note-icon">⌑</span><span><strong>Secure tool pipeline</strong><small>Constrain what an agent can read or change.</small></span></div>
+          <label><input id="approved-tools-only" type="checkbox" checked> Allow approved tools only <span>GitHub repository scope</span></label>
+          <label><input id="approve-external-writes" type="checkbox" checked> Approve external writes <span>Ask before tools post or modify data</span></label>
+          <label><input id="untrusted-inputs" type="checkbox" checked> Isolate imported content <span>Treat files and messages as untrusted input</span></label>
+          <label><input id="repo-scope-only" type="checkbox" checked> Restrict to selected repository <span>No unrestricted filesystem or network access</span></label>
+        </div>
+        <div class="guardrail-warning"><strong>Security boundary:</strong> these local settings are a product preview, not enforcement. Production must enforce budgets and tool permissions server-side, isolate execution, audit actions, protect secrets, and encrypt/authenticate communication. GitHub Issues and Discussions may be public; never post credentials or private data there.</div>
+        <div class="ai-dialog-footer"><span class="ai-provider-status"><i></i> Local preview · no model calls</span><button type="button" class="button button-primary" id="add-generated-tickets" disabled>Add tickets to board</button></div>
+      </div>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>

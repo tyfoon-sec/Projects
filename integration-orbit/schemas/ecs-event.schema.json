@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tyfoon-sec.github.io/Projects/integration-orbit/schemas/ecs-event.schema.json",
+  "title": "Orbit-importable ECS event",
+  "description": "An Elastic Common Schema-shaped event accepted by Orbit's local incident-response viewer.",
+  "type": "object",
+  "required": ["@timestamp", "event"],
+  "properties": {
+    "@timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ecs": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "required": ["action", "category", "outcome"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "kind": {
+          "type": "string"
+        },
+        "category": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "type": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dataset": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "outcome": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "severity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        }
+      }
+    },
+    "user": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "source": {
+      "type": "object"
+    },
+    "destination": {
+      "type": "object"
+    },
+    "host": {
+      "type": "object"
+    },
+    "agent": {
+      "type": "object"
+    },
+    "service": {
+      "type": "object"
+    },
+    "organization": {
+      "type": "object"
+    },
+    "trace": {
+      "type": "object"
+    },
+    "related": {
+      "type": "object"
+    },
+    "labels": {
+      "type": "object"
+    },
+    "message": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}
